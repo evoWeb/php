@@ -1,0 +1,1 @@
+Test locally with https://github.com/nektos/act

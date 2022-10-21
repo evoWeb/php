@@ -14,7 +14,7 @@ jobs:
           - name: PHP 7.4 fpm
             directory: 7.4
 
-    name: Build docker image ${{ matrix.meta.name }} and push it to repository
+    name: Build "${{ matrix.meta.name }}" and push it to repository
     runs-on: ubuntu-latest
 
     steps:
@@ -28,6 +28,7 @@ jobs:
           images: evowebde/php
 
       - name: meta infos are
+        run: echo 'test'
 
 
 #      - name: Log in to Docker Hub

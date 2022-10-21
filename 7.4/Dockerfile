@@ -13,7 +13,7 @@ RUN set -eux; \
         libfreetype6 \
         libicu-dev \
         libxml2 \
-        unzip \
+        libzip4 \
         libfreetype6-dev \
         libjpeg-dev \
         libpng-dev \
@@ -45,7 +45,10 @@ RUN set -eux; \
     apt-get autoremove -y; \
     apt-get clean -y; \
     cp "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"; \
-    echo "de_DE.UTF-8 UTF-8\nen_US.UTF-8 UTF-8" > /etc/locale.gen \
+    { \
+        echo "de_DE.UTF-8 UTF-8"; \
+        echo "en_US.UTF-8 UTF-8"; \
+    } | tee /etc/locale.gen \
     && locale-gen
 
 WORKDIR /usr/local/apache2/htdocs

@@ -2,8 +2,8 @@ name: Publish Docker image
 
 on:
   push:
-    branches:
-      - 'main'
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   push_to_registry:
@@ -13,6 +13,9 @@ jobs:
         meta:
           - name: PHP 7.4 fpm
             directory: 7.4
+            tags: |
+              evowebde/php:latest
+              evowebde/php:7.4
 
     name: Build "${{ matrix.meta.name }}" and push it to repository
     runs-on: ubuntu-latest
@@ -27,20 +30,16 @@ jobs:
         with:
           images: evowebde/php
 
-      - name: meta infos are
-        run: echo 'test'
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-
-#      - name: Log in to Docker Hub
-#        uses: docker/login-action@v2
-#        with:
-#          username: ${{ secrets.DOCKER_USERNAME }}
-#          password: ${{ secrets.DOCKER_PASSWORD }}
-#
-#      - name: Build and push Docker image
-#        uses: docker/build-push-action@v3
-#        with:
-#          context: ${{ matrix.meta.directory }}
-#          push: true
-#          tags: ${{ steps.meta.outputs.tags }}
-#          labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ matrix.meta.directory }}
+          push: true
+          tags: ${{ matrix.meta.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

@@ -1,8 +1,8 @@
 FROM php:7.4-fpm
 USER root
 
-RUN groupmod -g 82 www-data \
-    && usermod -u 82 www-data
+RUN groupmod -g 82 www-data; \
+    usermod -u 82 www-data
 
 RUN set -eux; \
     apt-get update -y; \
@@ -49,7 +49,11 @@ RUN set -eux; \
         echo "de_DE.UTF-8 UTF-8"; \
         echo "en_US.UTF-8 UTF-8"; \
     } | tee /etc/locale.gen \
-    && locale-gen
+    && locale-gen; \
+    sed -i "s/user = www-data/;user = www-data/" /usr/local/etc/php-fpm.d/www.conf.default; \
+    sed -i "s/group = www-data/;group = www-data/" /usr/local/etc/php-fpm.d/www.conf.default; \
+    sed -i "s/user = www-data/;user = www-data/" /usr/local/etc/php-fpm.d/www.conf; \
+    sed -i "s/group = www-data/;group = www-data/" /usr/local/etc/php-fpm.d/www.conf
 
 WORKDIR /usr/local/apache2/htdocs
 USER www-data

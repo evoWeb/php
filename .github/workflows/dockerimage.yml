@@ -16,6 +16,10 @@ jobs:
             tags: |
               evowebde/php:latest
               evowebde/php:7.4
+          - name: PHP 8.0 crontab
+            directory: 8.0-crontab
+            tags: |
+              evowebde/php:8.0-crontab
 
     name: Build "${{ matrix.meta.name }}" and push it to repository
     runs-on: ubuntu-latest

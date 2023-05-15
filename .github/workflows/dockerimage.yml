@@ -20,7 +20,7 @@ jobs:
             directory: 8.0-crontab
             tags: |
               evowebde/php:8.0-crontab
-          - name: PHP 8.2
+          - name: PHP 8.2 fpm
             directory: 8.2
             tags: |
               evowebde/php:8.2

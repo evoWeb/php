@@ -15,19 +15,34 @@ jobs:
             directory: 7.4
             tags: |
               evowebde/php:7.4
+          - name: PHP 7.4 fpm (debug)
+            directory: 7.4-debug
+            tags: |
+              evowebde/php:7.4-debug
+
           - name: PHP 8.0 crontab
             directory: 8.0-crontab
             tags: |
               evowebde/php:8.0-crontab
+
           - name: PHP 8.1 fpm
             directory: 8.1
             tags: |
               evowebde/php:8.1
+          - name: PHP 8.1 fpm (debug)
+            directory: 8.1-debug
+            tags: |
+                evowebde/php:8.1-debug
+
           - name: PHP 8.2 fpm
             directory: 8.2
             tags: |
               evowebde/php:latest
               evowebde/php:8.2
+          - name: PHP 8.2 fpm (debug)
+            directory: 8.2-debug
+            tags: |
+                evowebde/php:8.2-debug
 
     name: Build "${{ matrix.meta.name }}" and push it to repository
     runs-on: ubuntu-latest

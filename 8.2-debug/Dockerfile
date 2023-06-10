@@ -1,82 +1,79 @@
-FROM php:8.2-fpm-bullseye
+FROM ubuntu:jammy
 USER root
-
-RUN groupmod -g 82 www-data; \
-    usermod -u 82 www-data
+ENV TZ="Europe/Berlin"
+ENV PHPIZE_DEPS \
+    wget \
+    gnupg2 \
+    lsb-release \
+    libfreetype6-dev \
+    libicu-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libwebp-dev \
+    libxml2-dev \
+    libzip-dev
 
 RUN set -eux; \
     apt-get update -y; \
-    apt-get install -y --no-install-recommends \
-        locales \
-        mariadb-client \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        $PHPIZE_DEPS \
+        catdoc \
+        curl \
+        exiftags \
+        ghostscript \
         graphicsmagick \
-        libfreetype6 \
-        libicu-dev \
-        libxml2 \
+        mariadb-client \
+        locales \
         libzip4 \
-        libfreetype6-dev \
-        libjpeg-dev \
-        libpng-dev \
-        libwebp-dev \
-        libxml2-dev \
-        libzip-dev \
-    ; \
-    docker-php-ext-configure gd \
-        --with-freetype \
-        --with-jpeg \
-        --with-webp \
-    ; \
-    docker-php-ext-install gd \
-        intl \
-        mysqli \
-        pdo_mysql \
-        opcache \
-        soap \
-        zip \
-    ; \
-    apt-get purge -y \
-        libfreetype6-dev \
-        libjpeg-dev \
-        libpng-dev \
-        libwebp-dev \
-        libxml2-dev \
-        libzip-dev \
-    ; \
-    apt-get autoremove -y; \
-    apt-get clean -y; \
-    cp "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"; \
-    { \
-        echo "de_DE.UTF-8 UTF-8"; \
-        echo "en_US.UTF-8 UTF-8"; \
-    } | tee /etc/locale.gen \
-    && locale-gen; \
-    sed -i "s/user = www-data/;user = www-data/" /usr/local/etc/php-fpm.d/www.conf.default; \
-    sed -i "s/group = www-data/;group = www-data/" /usr/local/etc/php-fpm.d/www.conf.default; \
-    sed -i "s/user = www-data/;user = www-data/" /usr/local/etc/php-fpm.d/www.conf; \
-    sed -i "s/group = www-data/;group = www-data/" /usr/local/etc/php-fpm.d/www.conf
+        libfreetype6 \
+        libimage-exiftool-perl \
+        libxml2 \
+        poppler-utils \
+        tzdata \
+        ; \
+    echo $TZ > /etc/timezone \
+ && rm -f /etc/localtime \
+ && dpkg-reconfigure -fnoninteractive tzdata \
+ && locale-gen de_DE.UTF-8 \
+ && locale-gen en_US.UTF-8 \
+ && update-locale; \
+    wget -O /etc/apt/keyrings/ondrej-php.asc http://keyserver.ubuntu.com/pks/lookup?op=get\&search=0x4F4EA0AAE5267A6C \
+ && cat /etc/apt/keyrings/ondrej-php.asc \
+ && echo "deb [signed-by=/etc/apt/keyrings/ondrej-php.asc] http://ppa.launchpad.net/ondrej/php/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list; \
+    apt-get update -y \
+ && apt-get install -y --no-install-recommends \
+        php8.2 \
+        php8.2-apcu \
+        php8.2-bcmath \
+        php8.2-bz2 \
+        php8.2-cli \
+        php8.2-common \
+        php8.2-curl \
+        php8.2-dev \
+        php8.2-fpm \
+        php8.2-gd \
+        php8.2-imap \
+        php8.2-intl \
+        php8.2-mbstring \
+        php8.2-mcrypt \
+        php8.2-mysql \
+        php8.2-opcache \
+        php8.2-readline \
+        php8.2-soap \
+        php8.2-sqlite3 \
+        php8.2-xml \
+        php8.2-zip \
+        php8.2-xdebug; \
+    mkdir -p /usr/local/apache2/htdocs/; \
+    php -r "copy('http://getcomposer.org/installer', 'composer-setup.php');" \
+ && php -r "if (hash_file('sha384', 'composer-setup.php') === '55ce33d7678c5a611085589f1f3ddf8b3c52d662cd01d4ba75c0ee0459970c2200a51f492d557530c71c15d8dba01eae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
+ && php composer-setup.php --install-dir=/usr/bin --filename=composer \
+ && php -r "unlink('composer-setup.php');"; \
+    apt-get purge -y $PHPIZE_DEPS \
+ && apt-get autoremove -y \
+ && apt-get clean -y;
 
-RUN set -eux; \
-    apt-get update -y; \
-    apt-get install -y --no-install-recommends \
-        wget \
-        gnupg2 \
-        lsb-release; \
-    wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg; \
-    echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list; \
-    apt-get purge -y \
-        wget \
-        gnupg2 \
-        lsb-release; \
-    apt-get autoremove -y; \
-    apt-get clean -y;
-
-RUN apt-get update; \
-    apt-get install -y \
-        php-xdebug; \
-    docker-php-ext-enable xdebug; \
-    apt-get autoremove -y; \
-    apt-get clean -y;
-
-EXPOSE 9082
-WORKDIR /usr/local/apache2/htdocs
+EXPOSE 9081
+WORKDIR /usr/local/apache2/htdocs/
 USER www-data
+CMD ["php-fpm8.2"]

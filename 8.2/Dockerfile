@@ -17,6 +17,7 @@ RUN set -eux; \
     apt-get update -y; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         $PHPIZE_DEPS \
+        ca-certificates \
         catdoc \
         curl \
         exiftags \

@@ -72,7 +72,6 @@ RUN set -eux; \
  && apt-get autoremove -y \
  && apt-get clean -y;
 
-EXPOSE 9074
 WORKDIR /usr/local/apache2/htdocs/
 USER www-data
 CMD ["php-fpm7.4"]

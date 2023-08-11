@@ -34,7 +34,7 @@ jobs:
           images: evoweb/php
 
       - name: Log in to Docker Hub
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref_name != 'main'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -44,6 +44,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ${{ matrix.directory }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.directory }}-${{ github.ref }}
+          push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.directory }}-${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}

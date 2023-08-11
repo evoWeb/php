@@ -2,71 +2,48 @@ name: Publish Docker image
 
 on:
   push:
+    branches:
+      - 'main'
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   push_to_registry:
-    strategy:
-      fail-fast: false
-      matrix:
-        meta:
-          - name: PHP 7.4 fpm
-            directory: 7.4
-            tags: |
-              evoweb/php:7.4
-          - name: PHP 7.4 fpm (debug)
-            directory: 7.4-debug
-            tags: |
-              evoweb/php:7.4-debug
-
-          - name: PHP 8.0 crontab
-            directory: 8.0-crontab
-            tags: |
-              evoweb/php:8.0-crontab
-
-          - name: PHP 8.1 fpm
-            directory: 8.1
-            tags: |
-              evoweb/php:8.1
-          - name: PHP 8.1 fpm (debug)
-            directory: 8.1-debug
-            tags: |
-                evoweb/php:8.1-debug
-
-          - name: PHP 8.2 fpm
-            directory: 8.2
-            tags: |
-              evoweb/php:latest
-              evoweb/php:8.2
-          - name: PHP 8.2 fpm (debug)
-            directory: 8.2-debug
-            tags: |
-                evoweb/php:8.2-debug
-
-    name: Build "${{ matrix.meta.name }}" and push it to repository
     runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        directory:
+          - 7.4
+          - 7.4-debug
+          - 8.1
+          - 8.1-debug
+          - 8.2
+          - 8.2-debug
+          - 8.0-crontab
+
+    name: Build "evoweb/php:${{ matrix.directory }}" and push it to repository
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: evowebde/php
+          images: evoweb/php
 
       - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
-          context: ${{ matrix.meta.directory }}
-          push: true
-          tags: ${{ matrix.meta.tags }}
+          context: ${{ matrix.directory }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.directory }}-${{ github.ref }}
           labels: ${{ steps.meta.outputs.labels }}

@@ -10,19 +10,14 @@ on:
 jobs:
   push_to_registry:
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        directory:
-          - 7.4
-          - 7.4-debug
-          - 8.1
-          - 8.1-debug
-          - 8.2
-          - 8.2-debug
-          - 8.0-crontab
 
-    name: Build "evoweb/php:${{ matrix.directory }}" and push it to repository
+    strategy:
+      max-parallel: 4
+      matrix:
+        version: [7.4, 8.0, 8.1, 8.2, 8.3]
+        variants: [crontab, debug, fpm]
+
+    name: Build "evoweb/php:${{ matrix.version }}-${{ matrix.variants }}" and push it to repository
 
     steps:
       - uses: actions/checkout@v3
@@ -40,10 +35,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Check if variant exists
+        run: if [ -f "${{ matrix.version }}/${{ matrix.variants }}/Dockerfile" ]; then exit 0; else exit 1; fi
+
       - name: Build and push Docker image
+        if: ${{ success() }} && github.event_name != 'pull_request' && github.ref_name != 'main'
         uses: docker/build-push-action@v4
         with:
-          context: ${{ matrix.directory }}
+          context: ${{ matrix.version }}/${{ matrix.variants }}
           push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.directory }}-${{ github.ref_name }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.version }}-${{ matrix.variants }}-${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}

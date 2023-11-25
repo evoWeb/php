@@ -56,7 +56,6 @@ RUN set -eux; \
         php8.3-imap \
         php8.3-intl \
         php8.3-mbstring \
-        php8.3-mcrypt \
         php8.3-mysql \
         php8.3-opcache \
         php8.3-readline \

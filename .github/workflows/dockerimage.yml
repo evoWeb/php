@@ -29,8 +29,6 @@ jobs:
             if [ -f "${{ matrix.version }}/${{ matrix.variants }}/Dockerfile" ]; then fe=1; else fe=0; fi
             echo "file-exists=$fe" >> "$GITHUB_OUTPUT"
 
-      - run: echo "fe is " + ${{ steps.exists.outputs.file-exists }}
-
       - name: Extract metadata (tags, labels) for Docker
         if: steps.exists.outputs.file-exists == 1
         id: meta
@@ -47,6 +45,7 @@ jobs:
 
       - name: Build and push Docker image
         if: steps.exists.outputs.file-exists == 1
+        continue-on-error: true
         uses: docker/build-push-action@v4
         with:
           context: ${{ matrix.version }}/${{ matrix.variants }}

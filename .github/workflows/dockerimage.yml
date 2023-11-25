@@ -27,7 +27,7 @@ jobs:
         id: file-exists
         run: if [ -f "${{ matrix.version }}/${{ matrix.variants }}/Dockerfile" ]; then fe=1; else fe=0; fi
 
-      - run: echo "fe is $fe"
+      - run: echo "fe is " + ${{ steps.file-exists.outputs.fe }}
 
       - name: Extract metadata (tags, labels) for Docker
         if: steps.file-exists.outputs.fe == 1

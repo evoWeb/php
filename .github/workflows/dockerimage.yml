@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: true
       max-parallel: 4
       matrix:
         version: [7.4, 8.0, 8.1, 8.2, 8.3]
@@ -36,7 +37,9 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Check if variant exists
-        run: if [ -f "${{ matrix.version }}/${{ matrix.variants }}/Dockerfile" ]; then exit 0; else exit 1; fi
+        run: |
+            ls -la
+            if [ -f "${{ matrix.version }}/${{ matrix.variants }}/Dockerfile" ]; then exit 0; else exit 1; fi
 
       - name: Build and push Docker image
         if: ${{ success() }} && github.event_name != 'pull_request' && github.ref_name != 'main'

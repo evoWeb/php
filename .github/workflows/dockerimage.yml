@@ -37,12 +37,13 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Check if variant exists
+        id: file-exists
         run: |
             ls -la
-            if [ -f "${{ matrix.version }}/${{ matrix.variants }}/Dockerfile" ]; then exit 0; else exit 1; fi
+            if [ -f "${{ matrix.version }}/${{ matrix.variants }}/Dockerfile" ]; then fe=1; else fe=0; fi
 
       - name: Build and push Docker image
-        if: ${{ success() }} && github.event_name != 'pull_request' && github.ref_name != 'main'
+        if: ${{ steps.file-exists.outputs.fe == 1 }}
         uses: docker/build-push-action@v4
         with:
           context: ${{ matrix.version }}/${{ matrix.variants }}

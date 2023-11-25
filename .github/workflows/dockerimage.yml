@@ -23,27 +23,28 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Check if variant exists
+        id: file-exists
+        run: if [ -f "${{ matrix.version }}/${{ matrix.variants }}/Dockerfile" ]; then fe=1; else fe=0; fi
+
+      - run: echo "fe is $fe"
+
       - name: Extract metadata (tags, labels) for Docker
+        if: steps.file-exists.outputs.fe == 1
         id: meta
         uses: docker/metadata-action@v4
         with:
           images: evoweb/php
 
       - name: Log in to Docker Hub
-        if: github.event_name != 'pull_request' && github.ref_name != 'main'
+        if: steps.file-exists.outputs.fe == 1 && github.event_name != 'pull_request' && github.ref_name != 'main'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Check if variant exists
-        id: file-exists
-        run: |
-            ls -la
-            if [ -f "${{ matrix.version }}/${{ matrix.variants }}/Dockerfile" ]; then fe=1; else fe=0; fi
-
       - name: Build and push Docker image
-        if: ${{ steps.file-exists.outputs.fe == 1 }}
+        if: steps.file-exists.outputs.fe == 1
         uses: docker/build-push-action@v4
         with:
           context: ${{ matrix.version }}/${{ matrix.variants }}

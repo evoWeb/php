@@ -15,7 +15,7 @@ jobs:
       fail-fast: true
       max-parallel: 4
       matrix:
-        version: [7.4, 8.0, 8.1, 8.2, 8.3]
+        version: [7.4, "8.0", 8.1, 8.2, 8.3]
         variants: [crontab, debug, fpm]
 
     name: Build "evoweb/php:${{ matrix.version }}-${{ matrix.variants }}" and push it to repository
@@ -54,7 +54,7 @@ jobs:
       - name: Test the build image
         if: steps.exists.outputs.file-exists == 1
         run: |
-            docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.version }}-${{ matrix.variants }}
+            docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.version }}-${{ matrix.variants }} php -v
 
       - name: Build and push Docker image
         if: steps.exists.outputs.file-exists == 1 && github.event_name != 'pull_request' && github.ref_name != 'main'

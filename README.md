@@ -2,7 +2,7 @@ Test locally with https://github.com/nektos/act
 
 ## Test build locally
 ```shell
-docker buildx build --no-cache --compress 8.3/fpm/ --tag evoweb/php:8.3-fpm
+docker buildx build --load --no-cache --compress --progress plain --tag evoweb/php:8.3-fpm 8.3/fpm
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ networks:
 
 services:
     app:
-        image: evoweb/php:8.3
+        image: evoweb/php:8.3-fpm
         container_name: ${APP_NAME}_app
         restart: always
         networks:

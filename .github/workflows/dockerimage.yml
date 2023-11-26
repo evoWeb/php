@@ -45,6 +45,8 @@ jobs:
 
       - name: Build and push Docker image
         if: steps.exists.outputs.file-exists == 1
+        id: build
+        continue-on-error: true
         uses: docker/build-push-action@v5
         with:
           context: ${{ matrix.version }}/${{ matrix.variants }}
@@ -52,12 +54,12 @@ jobs:
           tags: evoweb/php:${{ matrix.version }}-${{ matrix.variants }}
 
       - name: Test the build image
-        if: steps.exists.outputs.file-exists == 1
+        if: steps.exists.outputs.file-exists == 1 && steps.build.outputs.imageid != ''
         run: |
             docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.version }}-${{ matrix.variants }} php -v
 
       - name: Build and push Docker image
-        if: steps.exists.outputs.file-exists == 1 && github.event_name != 'pull_request' && github.ref_name != 'main'
+        if: steps.exists.outputs.file-exists == 1 && steps.build.outputs.imageid != '' && github.event_name != 'pull_request' && github.ref_name != 'main'
         uses: docker/build-push-action@v5
         with:
           context: ${{ matrix.version }}/${{ matrix.variants }}

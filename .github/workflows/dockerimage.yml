@@ -46,9 +46,9 @@ jobs:
       - name: Build and push Docker image
         if: steps.exists.outputs.file-exists == 1
         continue-on-error: true
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: ${{ matrix.version }}/${{ matrix.variants }}
           push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.version }}-${{ matrix.variants }}-${{ github.ref_name }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.version }}-${{ matrix.variants }},${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.version }}-${{ matrix.variants }}-${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}

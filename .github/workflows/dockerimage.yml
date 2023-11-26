@@ -16,7 +16,7 @@ jobs:
       max-parallel: 4
       matrix:
         version: [7.4, "8.0", 8.1, 8.2, 8.3]
-        variants: [crontab, debug, fpm]
+        variants: [crontab, fpm, debug]
 
     name: Build "evoweb/php:${{ matrix.version }}-${{ matrix.variants }}" and push it to repository
 

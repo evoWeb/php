@@ -57,7 +57,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           file: ${{ matrix.version }}/${{ matrix.variant }}/Dockerfile
-          context: .
           push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
           tags: evoweb/php:${{ matrix.version }}-${{ matrix.variant }},evoweb/php:${{ matrix.version }}-${{ matrix.variant }}-${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}

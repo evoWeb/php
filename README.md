@@ -2,7 +2,7 @@ Test locally with https://github.com/nektos/act
 
 ## Test build locally
 ```shell
-docker buildx build --load --no-cache --compress --progress plain --tag evoweb/php:8.3-fpm 8.3/fpm
+docker buildx build --load --no-cache --compress --progress plain --tag evoweb/php:8.3-fpm -f 8.3/fpm/Dockerfile .
 ```
 
 ## Usage

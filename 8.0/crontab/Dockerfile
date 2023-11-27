@@ -3,15 +3,17 @@ USER root
 
 ENV TZ="Europe/Berlin"
 ENV LOCALE="de_DE.UTF-8 UTF-8\nen_US.UTF-8 UTF-8"
+ENV PHPIZE_DEPS \
+    lsb-release \
+    ca-certificates \
+    locales
 
 RUN set -eux; \
     apt-get update -y \
- && apt-get install -y --no-install-recommends \
-        lsb-release \
-        ca-certificates \
-        locales \
-        cron \
-        curl; \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        $PHPIZE_DEPS \
+        curl \
+        cron; \
     echo $TZ > /etc/timezone \
  && rm -f /etc/localtime \
  && dpkg-reconfigure -fnoninteractive tzdata \
@@ -29,7 +31,8 @@ RUN set -eux; \
         php8.0-curl \
         php8.0-imap \
         php8.0-mbstring \
-        php8.0-mcrypt \
+        php8.0-mcrypt; \
+    apt-get purge -y $PHPIZE_DEPS \
  && apt-get autoremove -y \
  && apt-get clean -y; \
     mkdir -p /etc/cron.5minutes \

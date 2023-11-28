@@ -78,6 +78,9 @@ RUN set -eux; \
 COPY ./config/fpm-custom.ini /etc/php/8.2/fpm/conf.d/z-custom.ini
 COPY ./config/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 
+HEALTHCHECK --interval=60s --retries=5 --start-period=20s --timeout=10s \
+    CMD curl --fail http://localhost:9000 || exit 1
+
 WORKDIR /usr/local/apache2/htdocs/
 USER www-data
 CMD ["php-fpm8.2"]

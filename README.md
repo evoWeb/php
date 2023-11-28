@@ -40,12 +40,6 @@ services:
             - '${INSTANCE_FOLDER:-.}/config/php/z-custom.ini:/etc/php/8.3/fpm/conf.d/z-custom.ini:ro'
             - '${INSTANCE_FOLDER:-.}/config/php/production.conf:/etc/php/8.3/fpm/pool.d/production.conf:ro'
             - '${INSTANCE_FOLDER:-.}/config/php/staging.conf:/etc/php/8.3/fpm/pool.d/staging.conf:ro'
-        healthcheck:
-            test: curl --fail http://localhost:9000 || exit 1
-            interval: 60s
-            retries: 5
-            start_period: 20s
-            timeout: 10s
 ```
 
 ### .env

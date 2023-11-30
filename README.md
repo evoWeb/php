@@ -37,7 +37,6 @@ services:
             - '/etc/localtime:/etc/localtime:ro'
             - '${INSTANCE_FOLDER:-.}/data/htdocs:/usr/local/apache2/htdocs'
             - '${INSTANCE_FOLDER:-.}/data/logs:/var/log'
-            - '${INSTANCE_FOLDER:-.}/config/php/z-custom.ini:/etc/php/8.3/fpm/conf.d/z-custom.ini:ro'
             - '${INSTANCE_FOLDER:-.}/config/php/production.conf:/etc/php/8.3/fpm/pool.d/production.conf:ro'
             - '${INSTANCE_FOLDER:-.}/config/php/staging.conf:/etc/php/8.3/fpm/pool.d/staging.conf:ro'
 ```

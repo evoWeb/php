@@ -24,14 +24,14 @@ RUN set -eux; \
  && echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list; \
     apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        php8.0 \
-        php8.0-apcu \
-        php8.0-cli \
-        php8.0-common \
-        php8.0-curl \
-        php8.0-imap \
-        php8.0-mbstring \
-        php8.0-mcrypt; \
+        php8.2 \
+        php8.2-apcu \
+        php8.2-cli \
+        php8.2-common \
+        php8.2-curl \
+        php8.2-imap \
+        php8.2-mbstring \
+        php8.2-mcrypt; \
     apt-get purge -y $PHPIZE_DEPS \
  && apt-get autoremove -y \
  && apt-get clean -y; \

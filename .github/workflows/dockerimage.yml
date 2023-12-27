@@ -8,16 +8,13 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  push_to_registry:
+  push_fpm_to_registry:
     strategy:
       fail-fast: true
       max-parallel: 4
       matrix:
-        version: ["7.4", "8.0", "8.1", "8.2", "8.3"]
-        variant: [fpm, debug]
-        include:
-            - version: "8.0"
-              variant: crontab
+        version: [ "7.4", "8.0", "8.1", "8.2", "8.3" ]
+        variant: [ fpm, debug ]
 
     runs-on: ubuntu-latest
     name: Build "evoweb/php:${{ matrix.version }}-${{ matrix.variant }}" and push it to repository
@@ -44,14 +41,14 @@ jobs:
       - name: Test the build image
         if: steps.build.outputs.imageid != ''
         run: |
-            docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.version }}-${{ matrix.variant }} php -v
+          docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.version }}-${{ matrix.variant }} php -v
 
       - name: Log in to Docker Hub
         if: steps.build.outputs.imageid != '' && github.event_name != 'pull_request' && github.ref_name != 'main'
         uses: docker/login-action@v2
         with:
-            username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push image to Docker Hub
         if: steps.build.outputs.imageid != '' && github.event_name != 'pull_request' && github.ref_name != 'main'
@@ -61,4 +58,55 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
           tags: evoweb/php:${{ matrix.version }}-${{ matrix.variant }},evoweb/php:${{ matrix.version }}-${{ matrix.variant }}-${{ github.ref_name }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  push_others_to_registry:
+    strategy:
+      fail-fast: true
+      max-parallel: 4
+      matrix:
+        variant: [ crontab, composer ]
+
+    runs-on: ubuntu-latest
+    name: Build "evoweb/php:${{ matrix.variant }}" and push it to repository
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: evoweb/php
+
+      - name: Build Docker image
+        id: build
+        continue-on-error: true
+        uses: docker/build-push-action@v5
+        with:
+          file: ${{ matrix.variant }}/Dockerfile
+          context: .
+          load: true
+          tags: evoweb/php:${{ matrix.variant }}
+
+      - name: Test the build image
+        if: steps.build.outputs.imageid != ''
+        run: |
+          docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.variant }} php -v
+
+      - name: Log in to Docker Hub
+        if: steps.build.outputs.imageid != '' && github.event_name != 'pull_request' && github.ref_name != 'main'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push image to Docker Hub
+        if: steps.build.outputs.imageid != '' && github.event_name != 'pull_request' && github.ref_name != 'main'
+        uses: docker/build-push-action@v5
+        with:
+          file: ${{ matrix.variant }}/Dockerfile
+          context: .
+          push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
+          tags: evoweb/php:${{ matrix.version }}-${{ matrix.variant }},evoweb/php:${{ matrix.variant }}-${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}

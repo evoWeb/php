@@ -108,5 +108,5 @@ jobs:
           file: ${{ matrix.variant }}/Dockerfile
           context: .
           push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
-          tags: evoweb/php:${{ matrix.version }}-${{ matrix.variant }},evoweb/php:${{ matrix.variant }}-${{ github.ref_name }}
+          tags: evoweb/php:${{ matrix.variant }},evoweb/php:${{ matrix.variant }}-${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}

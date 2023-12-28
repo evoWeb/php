@@ -120,3 +120,95 @@ pm = ondemand
 pm.max_children = 1
 pm.max_requests = 5
 ```
+
+## Usage of the composer image
+
+The composer image is intended for usage as shell alias. It's extended with rsync and mysql-client to allow composer scripts to synchronize TYPO3 installations database and shared folder.
+
+### .bashrc
+
+The directories /etc/passwd and $HOME are mounted to tell the container what user $(id -u) is and allow ssh connections with ssh key.
+
+This alias assumes that a docker network db exists. This is needed for the database synchronization.
+
+AdditionalConfiguration.php is a file to override database connection information for Development context.
+You need to implement the loading of AdditionalConfiguration.php in your TYPO3 installation.
+
+The config around .config/composer and .cache/composer are used to allow installing composer global packages and store global authentications.
+
+```shell
+function composer() {
+    mkdir -p $HOME/.config/composer
+    mkdir -p $HOME/.cache/composer
+    docker run -t \
+        --user $(id -u):33 \
+        --env COMPOSER_HOME=/config \
+        --env COMPOSER_CACHE_DIR=/cache \
+        --network db \
+        --volume /etc/passwd:/etc/passwd:ro \
+        --volume $HOME/:$HOME/ \
+        --volume $HOME/.config/composer:/config \
+        --volume $HOME/.cache/composer:/cache \
+        --volume $PWD:/app \
+	    --volume /home/www/AdditionalConfiguration.php:/AdditionalConfiguration.php \
+        evoweb/php:composer $@
+}
+alias composer=composer
+```
+
+### composer.json
+
+All _* scripts are configuration or internal command which should be called individually.
+
+- _register:production:[host|port|path|container] are settings for the individual remote host.
+- _sync_shared synchronizes the shared folder content from remote to local.
+- _export_db exports the production database with the given TYPO3_CONTEXT with the help of helhum/typo3-console to the local folder ./shared/ with the current date (see $(date +%Y%m%d)) in the export file name.
+- _import_db import the exported file of today (see $(date +%Y%m%d)) with the help of helhum/typo3-console
+- _remove_db removes the export of today (see $(date +%Y%m%d)) after it was imported.
+
+Script starting with typo3:* bundle call of configuration and internal command to achieve the sync, dump and import.
+
+```json
+{
+    "scripts": {
+        "_register:production:host": "@putenv HOST=[USER]@[HOST]",
+		"_register:production:port": "@putenv PORT=[PORT]",
+		"_register:production:path": "@putenv SSH_PATH=[PATH]",
+		"_register:production:container": "@putenv INSTANCE_ID=[CONTAINER_ID]",
+
+		"_register:production:context": [
+			"@_register:production:host",
+			"@_register:production:port",
+			"@_register:production:path",
+			"@_register:production:container",
+			"@putenv TYPO3_CONTEXT=Production",
+			"@putenv STAGE=production"
+		],
+
+		"_sync_shared": "rsync -av -e \"ssh -p ${PORT}\" ${HOST}:${SSH_PATH}/* ./shared/",
+		"_export_db": "ssh -p ${PORT} ${HOST} \"docker exec -e TYPO3_CONTEXT=\\\"${TYPO3_CONTEXT}\\\" \\$(docker ps -q -f name=${INSTANCE_ID}-app-1) php /usr/local/apache2/htdocs/${STAGE}/current/vendor/bin/typo3 database:export\" > ./shared/db_export_${STAGE}_$(date +%Y%m%d).sql",
+		"_import_db": "typo3 database:import --connection Default < ./shared/db_export_${STAGE}_$(date +%Y%m%d).sql",
+		"_remove_db": "rm ./shared/db_export_${STAGE}_$(date +%Y%m%d).sql",
+
+        "typo3:sync:sharedproduction": [
+			"@_register:production:context",
+			"@_sync_shared"
+		],
+		"typo3:sync:dbproduction": [
+			"@typo3:dump:dbproduction",
+			"@_register:local:context",
+			"@_import_db",
+			"@_remove_db"
+		],
+		"typo3:dump:dbproduction": [
+			"@_register:production:context",
+			"@_export_db"
+		],
+		"typo3:import:dbproduction": [
+			"@_register:production:context",
+			"@_register:local:context",
+			"@_import_db"
+		]
+    }
+}
+```

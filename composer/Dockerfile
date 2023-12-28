@@ -1,5 +1,5 @@
 FROM composer:latest
 
-RUN apk update && apk add rsync mysql-client
+RUN apk --update --no-cache add rsync mysql-client
 
 CMD ["composer"]

@@ -144,15 +144,18 @@ function composer() {
         --user $(id -u):33 \
         --env COMPOSER_HOME=/config \
         --env COMPOSER_CACHE_DIR=/cache \
+        --env SSH_AUTH_SOCK=/ssh-agent \
         --network db \
+        --volume $(readlink -f $SSH_AUTH_SOCK):/ssh-agent \
         --volume /etc/passwd:/etc/passwd:ro \
         --volume $HOME/:$HOME/ \
         --volume $HOME/.config/composer:/config \
         --volume $HOME/.cache/composer:/cache \
         --volume $PWD:/app \
-	    --volume /home/www/AdditionalConfiguration.php:/AdditionalConfiguration.php \
+        --volume /home/www/AdditionalConfiguration.php:/AdditionalConfiguration.php \
         evoweb/php:composer $@
 }
+
 alias composer=composer
 ```
 
@@ -184,6 +187,9 @@ Script starting with typo3:* bundle call of configuration and internal command t
 			"@putenv TYPO3_CONTEXT=Production",
 			"@putenv STAGE=production"
 		],
+        "_register:local:context": [
+            "@putenv TYPO3_CONTEXT=Development"
+        ],
 
 		"_sync_shared": "rsync -av -e \"ssh -p ${PORT}\" ${HOST}:${SSH_PATH}/* ./shared/",
 		"_export_db": "ssh -p ${PORT} ${HOST} \"docker exec -e TYPO3_CONTEXT=\\\"${TYPO3_CONTEXT}\\\" \\$(docker ps -q -f name=${INSTANCE_ID}-app-1) php /usr/local/apache2/htdocs/${STAGE}/current/vendor/bin/typo3 database:export\" > ./shared/db_export_${STAGE}_$(date +%Y%m%d).sql",

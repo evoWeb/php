@@ -23,6 +23,20 @@ version: '3.9'
 networks:
     backend: {}
 
+volumes:
+    data:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ${INSTANCE_FOLDER:-.}/data/htdocs
+    logs:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ${INSTANCE_FOLDER:-.}/data/logs
+
 services:
     app:
         image: evoweb/php:8.3-fpm
@@ -35,8 +49,8 @@ services:
             - HTTP_STAGING_DOMAIN
         volumes:
             - '/etc/localtime:/etc/localtime:ro'
-            - '${INSTANCE_FOLDER:-.}/data/htdocs:/usr/local/apache2/htdocs'
-            - '${INSTANCE_FOLDER:-.}/data/logs:/var/log'
+            - data:/usr/local/apache2/htdocs
+            - logs:/var/log
             - '${INSTANCE_FOLDER:-.}/config/php/production.conf:/etc/php/8.3/fpm/pool.d/production.conf:ro'
             - '${INSTANCE_FOLDER:-.}/config/php/staging.conf:/etc/php/8.3/fpm/pool.d/staging.conf:ro'
 ```
@@ -175,46 +189,46 @@ Script starting with typo3:* bundle call of configuration and internal command t
 {
     "scripts": {
         "_register:production:host": "@putenv HOST=[USER]@[HOST]",
-		"_register:production:port": "@putenv PORT=[PORT]",
-		"_register:production:path": "@putenv SSH_PATH=[PATH]",
-		"_register:production:container": "@putenv INSTANCE_ID=[CONTAINER_ID]",
+        "_register:production:port": "@putenv PORT=[PORT]",
+        "_register:production:path": "@putenv SSH_PATH=[PATH]",
+        "_register:production:container": "@putenv INSTANCE_ID=[CONTAINER_ID]",
 
-		"_register:production:context": [
-			"@_register:production:host",
-			"@_register:production:port",
-			"@_register:production:path",
-			"@_register:production:container",
-			"@putenv TYPO3_CONTEXT=Production",
-			"@putenv STAGE=production"
-		],
+        "_register:production:context": [
+            "@_register:production:host",
+            "@_register:production:port",
+            "@_register:production:path",
+            "@_register:production:container",
+            "@putenv TYPO3_CONTEXT=Production",
+            "@putenv STAGE=production"
+        ],
         "_register:local:context": [
             "@putenv TYPO3_CONTEXT=Development"
         ],
 
-		"_sync_shared": "rsync -av -e \"ssh -p ${PORT}\" ${HOST}:${SSH_PATH}/* ./shared/",
-		"_export_db": "ssh -p ${PORT} ${HOST} \"docker exec -e TYPO3_CONTEXT=\\\"${TYPO3_CONTEXT}\\\" \\$(docker ps -q -f name=${INSTANCE_ID}-app-1) php /usr/local/apache2/htdocs/${STAGE}/current/vendor/bin/typo3 database:export\" > ./shared/db_export_${STAGE}_$(date +%Y%m%d).sql",
-		"_import_db": "typo3 database:import --connection Default < ./shared/db_export_${STAGE}_$(date +%Y%m%d).sql",
-		"_remove_db": "rm ./shared/db_export_${STAGE}_$(date +%Y%m%d).sql",
+        "_sync_shared": "rsync -av -e \"ssh -p ${PORT}\" ${HOST}:${SSH_PATH}/* ./shared/",
+        "_export_db": "ssh -p ${PORT} ${HOST} \"docker exec -e TYPO3_CONTEXT=\\\"${TYPO3_CONTEXT}\\\" \\$(docker ps -q -f name=${INSTANCE_ID}-app-1) php /usr/local/apache2/htdocs/${STAGE}/current/vendor/bin/typo3 database:export\" > ./shared/db_export_${STAGE}_$(date +%Y%m%d).sql",
+        "_import_db": "typo3 database:import --connection Default < ./shared/db_export_${STAGE}_$(date +%Y%m%d).sql",
+        "_remove_db": "rm ./shared/db_export_${STAGE}_$(date +%Y%m%d).sql",
 
         "typo3:sync:sharedproduction": [
-			"@_register:production:context",
-			"@_sync_shared"
-		],
-		"typo3:sync:dbproduction": [
-			"@typo3:dump:dbproduction",
-			"@_register:local:context",
-			"@_import_db",
-			"@_remove_db"
-		],
-		"typo3:dump:dbproduction": [
-			"@_register:production:context",
-			"@_export_db"
-		],
-		"typo3:import:dbproduction": [
-			"@_register:production:context",
-			"@_register:local:context",
-			"@_import_db"
-		]
+            "@_register:production:context",
+            "@_sync_shared"
+        ],
+        "typo3:sync:dbproduction": [
+            "@typo3:dump:dbproduction",
+            "@_register:local:context",
+            "@_import_db",
+            "@_remove_db"
+        ],
+        "typo3:dump:dbproduction": [
+            "@_register:production:context",
+            "@_export_db"
+        ],
+        "typo3:import:dbproduction": [
+            "@_register:production:context",
+            "@_register:local:context",
+            "@_import_db"
+        ]
     }
 }
 ```

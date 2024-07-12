@@ -16,7 +16,7 @@ jobs:
         version:
           - number: 7.4
             packages: php7.4-json
-          - number: 8.0
+          - number: "8.0"
           - number: 8.1
           - number: 8.2
           - number: 8.3

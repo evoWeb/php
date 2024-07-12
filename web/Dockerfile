@@ -7,7 +7,6 @@ ARG TYPE="fpm"
 ARG VERSION=8.3
 ENV LOCALE="de_DE.UTF-8 UTF-8\nen_US.UTF-8 UTF-8"
 ENV PHPIZE_DEPS="wget gnupg2 lsb-release libfreetype6-dev libicu-dev libjpeg-dev libpng-dev libwebp-dev libxml2-dev libzip-dev locales"
-ENV TZ="Europe/Berlin"
 ENV VERSION=${VERSION}
 
 SHELL ["/bin/bash", "-c"]
@@ -30,9 +29,7 @@ RUN set -eux; \
         libxml2 \
         poppler-utils \
         tzdata; \
-    echo $TZ > /etc/timezone \
- && rm -f /etc/localtime \
- && dpkg-reconfigure -fnoninteractive tzdata \
+    dpkg-reconfigure -fnoninteractive tzdata \
  && echo $LOCALE > /etc/locale.gen \
  && locale-gen \
  && update-locale; \

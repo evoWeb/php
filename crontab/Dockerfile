@@ -1,7 +1,6 @@
 FROM debian:bookworm-slim
 USER root
 
-ENV TZ="Europe/Berlin"
 ENV LOCALE="de_DE.UTF-8 UTF-8\nen_US.UTF-8 UTF-8"
 ENV PHPIZE_DEPS="lsb-release ca-certificates locales"
 
@@ -11,9 +10,7 @@ RUN set -eux; \
         ${PHPIZE_DEPS} \
         curl \
         cron; \
-    echo $TZ > /etc/timezone \
- && rm -f /etc/localtime \
- && dpkg-reconfigure -fnoninteractive tzdata \
+    dpkg-reconfigure -fnoninteractive tzdata \
  && echo $LOCALE > /etc/locale.gen \
  && locale-gen \
  && update-locale; \

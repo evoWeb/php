@@ -71,7 +71,9 @@ jobs:
             VERSION=${{ matrix.version.number }}
             ADDITIONAL_PACKAGES=${{ matrix.version.packages }}
           push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
-          tags: evoweb/php:${{ matrix.version.number }}-${{ matrix.variant }},evoweb/php:${{ matrix.version.number }}-${{ matrix.variant }}-${{ github.ref_name }}
+          tags: |
+            evoweb/php:${{ matrix.version.number }}-${{ matrix.variant }}
+            evoweb/php:${{ matrix.version.number }}-${{ matrix.variant }}-${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}
 
   push_others_to_registry:
@@ -122,5 +124,7 @@ jobs:
           file: ${{ matrix.variant }}/Dockerfile
           context: .
           push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
-          tags: evoweb/php:${{ matrix.variant }},evoweb/php:${{ matrix.variant }}-${{ github.ref_name }}
+          tags: |
+            evoweb/php:${{ matrix.variant }}
+            evoweb/php:${{ matrix.variant }}-${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}

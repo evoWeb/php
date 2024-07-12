@@ -1,17 +1,14 @@
-FROM debian:12-slim
+FROM debian:bookworm-slim
 USER root
 
 ENV TZ="Europe/Berlin"
 ENV LOCALE="de_DE.UTF-8 UTF-8\nen_US.UTF-8 UTF-8"
-ENV PHPIZE_DEPS \
-    lsb-release \
-    ca-certificates \
-    locales
+ENV PHPIZE_DEPS="lsb-release ca-certificates locales"
 
 RUN set -eux; \
     apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        $PHPIZE_DEPS \
+        ${PHPIZE_DEPS} \
         curl \
         cron; \
     echo $TZ > /etc/timezone \
@@ -24,15 +21,15 @@ RUN set -eux; \
  && echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list; \
     apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        php8.2 \
-        php8.2-apcu \
-        php8.2-cli \
-        php8.2-common \
-        php8.2-curl \
-        php8.2-imap \
-        php8.2-mbstring \
-        php8.2-mcrypt; \
-    apt-get purge -y $PHPIZE_DEPS \
+        php8.3 \
+        php8.3-apcu \
+        php8.3-cli \
+        php8.3-common \
+        php8.3-curl \
+        php8.3-imap \
+        php8.3-mbstring \
+        php8.3-mcrypt; \
+    apt-get purge -y ${PHPIZE_DEPS} \
  && apt-get autoremove -y \
  && apt-get clean -y; \
     mkdir -p /etc/cron.5minutes \

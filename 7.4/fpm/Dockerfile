@@ -1,25 +1,21 @@
-FROM debian:12-slim
+FROM debian:bookworm-slim
 USER root
 
-ENV TZ="Europe/Berlin"
+ARG COMPOSER_FILE_HASH="dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f7cd84f6db9189d43a81e5503cda447da73c7e5b6"
+ARG TYPE="fpm"
+ARG VERSION=7.4
+ARG ADDITIONAL_PACKAGES="php${VERSION}-json"
 ENV LOCALE="de_DE.UTF-8 UTF-8\nen_US.UTF-8 UTF-8"
-ENV PHPIZE_DEPS \
-    wget \
-    gnupg2 \
-    lsb-release \
-    libfreetype6-dev \
-    libicu-dev \
-    libjpeg-dev \
-    libpng-dev \
-    libwebp-dev \
-    libxml2-dev \
-    libzip-dev \
-    locales
+ENV PHPIZE_DEPS="wget gnupg2 lsb-release libfreetype6-dev libicu-dev libjpeg-dev libpng-dev libwebp-dev libxml2-dev libzip-dev locales"
+ENV TZ="Europe/Berlin"
+ENV VERSION=${VERSION}
+
+SHELL ["/bin/bash", "-c"]
 
 RUN set -eux; \
     apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        $PHPIZE_DEPS \
+        ${PHPIZE_DEPS} \
         ca-certificates \
         catdoc \
         curl \
@@ -44,40 +40,42 @@ RUN set -eux; \
  && echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list; \
     apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        php7.4 \
-        php7.4-apcu \
-        php7.4-bcmath \
-        php7.4-bz2 \
-        php7.4-cli \
-        php7.4-common \
-        php7.4-curl \
-        php7.4-dev \
-        php7.4-fpm \
-        php7.4-gd \
-        php7.4-imap \
-        php7.4-intl \
-        php7.4-json \
-        php7.4-mbstring \
-        php7.4-mysql \
-        php7.4-opcache \
-        php7.4-readline \
-        php7.4-soap \
-        php7.4-sqlite3 \
-        php7.4-xml \
-        php7.4-zip; \
-    apt-get purge -y $PHPIZE_DEPS \
+        ${ADDITIONAL_PACKAGES} \
+        php${VERSION} \
+        php${VERSION}-apcu \
+        php${VERSION}-bcmath \
+        php${VERSION}-bz2 \
+        php${VERSION}-cli \
+        php${VERSION}-common \
+        php${VERSION}-curl \
+        php${VERSION}-dev \
+        php${VERSION}-fpm \
+        php${VERSION}-gd \
+        php${VERSION}-imap \
+        php${VERSION}-intl \
+        php${VERSION}-mbstring \
+        php${VERSION}-mcrypt \
+        php${VERSION}-mysql \
+        php${VERSION}-opcache \
+        php${VERSION}-readline \
+        php${VERSION}-soap \
+        php${VERSION}-sqlite3 \
+        php${VERSION}-xml \
+        php${VERSION}-zip; \
+    [ "${TYPE}" == "debug" ] && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends php${VERSION}-xdebug; \
+    apt-get purge -y ${PHPIZE_DEPS} \
  && apt-get autoremove -y \
  && apt-get clean -y; \
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
- && php -r "if (hash_file('sha384', 'composer-setup.php') === '55ce33d7678c5a611085589f1f3ddf8b3c52d662cd01d4ba75c0ee0459970c2200a51f492d557530c71c15d8dba01eae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
+ && php -r "if (hash_file('sha384', 'composer-setup.php') === '${COMPOSER_FILE_HASH}') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
  && php composer-setup.php --install-dir=/usr/bin --filename=composer \
  && php -r "unlink('composer-setup.php');"; \
     mkdir -p /usr/local/apache2/htdocs/ \
  && chgrp www-data /var/log \
  && chmod gu+w /var/log
 
-COPY ./config/fpm-custom.ini /etc/php/7.4/fpm/conf.d/z-custom.ini
-COPY ./config/www.conf /etc/php/7.4/fpm/pool.d/www.conf
+COPY ./config/${TYPE}-custom.ini /etc/php/${VERSION}/fpm/conf.d/z-custom.ini
+COPY ./config/www.conf /etc/php/${VERSION}/fpm/pool.d/www.conf
 
 HEALTHCHECK \
     --interval=60s \
@@ -88,4 +86,4 @@ HEALTHCHECK \
 
 WORKDIR /usr/local/apache2/htdocs/
 USER www-data
-CMD ["php-fpm7.4"]
+CMD ["php-fpm${VERSION}"]

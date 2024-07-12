@@ -3,8 +3,8 @@ USER root
 
 ARG ADDITIONAL_PACKAGES=""
 ARG COMPOSER_FILE_HASH="dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f7cd84f6db9189d43a81e5503cda447da73c7e5b6"
-ARG TYPE="debug"
-ARG VERSION=8.0
+ARG TYPE="fpm"
+ARG VERSION=8.3
 ENV LOCALE="de_DE.UTF-8 UTF-8\nen_US.UTF-8 UTF-8"
 ENV PHPIZE_DEPS="wget gnupg2 lsb-release libfreetype6-dev libicu-dev libjpeg-dev libpng-dev libwebp-dev libxml2-dev libzip-dev locales"
 ENV TZ="Europe/Berlin"
@@ -40,6 +40,7 @@ RUN set -eux; \
  && echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list; \
     apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ${ADDITIONAL_PACKAGES} \
         php${VERSION} \
         php${VERSION}-apcu \
         php${VERSION}-bcmath \

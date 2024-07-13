@@ -83,4 +83,4 @@ HEALTHCHECK \
 
 WORKDIR /usr/local/apache2/htdocs/
 USER www-data
-CMD ["php-fpm${VERSION}"]
+CMD ["php-fpm8.2"]

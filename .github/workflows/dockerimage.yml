@@ -20,6 +20,7 @@ jobs:
           - number: 8.1
           - number: 8.2
           - number: 8.3
+          - number: 8.4
         variant: [ fpm, debug ]
 
     runs-on: ubuntu-latest

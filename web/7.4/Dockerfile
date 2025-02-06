@@ -6,7 +6,7 @@ ARG COMPOSER_FILE_HASH="dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f
 ARG TYPE="fpm"
 ARG VERSION=8.3
 ENV LOCALE="de_DE.UTF-8 UTF-8\nen_US.UTF-8 UTF-8"
-ENV PHPIZE_DEPS="wget gnupg2 lsb-release libfreetype6-dev libicu-dev libjpeg-dev libpng-dev libwebp-dev libavif-dev libheif-dev libxml2-dev libzip-dev locales"
+ENV PHPIZE_DEPS="wget gnupg2 lsb-release libfreetype6-dev libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libavif-dev libheif-dev libxml2-dev libzip-dev locales"
 ENV VERSION=${VERSION}
 
 SHELL ["/bin/bash", "-c"]
@@ -21,7 +21,7 @@ RUN set -eux; \
         libfcgi-bin \
         exiftags \
         ghostscript \
-        graphicsmagick \
+        imagemagick \
         mariadb-client \
         libzip4 \
         libfreetype6 \

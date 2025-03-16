@@ -82,7 +82,7 @@ jobs:
       fail-fast: true
       max-parallel: 4
       matrix:
-        variant: [ crontab, composer ]
+        variant: [ crontab, composer, composer-node ]
 
     runs-on: ubuntu-latest
     name: Build "evoweb/php:${{ matrix.variant }}" and push it to repository
@@ -127,5 +127,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
           tags: |
             evoweb/php:${{ matrix.variant }}
+            evoweb/php:${{ matrix.variant }}-latest
             evoweb/php:${{ matrix.variant }}-${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}

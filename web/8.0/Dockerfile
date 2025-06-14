@@ -23,6 +23,7 @@ RUN set -eux; \
         ghostscript \
         imagemagick \
         mariadb-client \
+        postgresql-client \
         libzip4 \
         libfreetype6 \
         libimage-exiftool-perl \
@@ -54,6 +55,7 @@ RUN set -eux; \
         php${VERSION}-mcrypt \
         php${VERSION}-mysql \
         php${VERSION}-opcache \
+        php${VERSION}-pgsql \
         php${VERSION}-readline \
         php${VERSION}-soap \
         php${VERSION}-sqlite3 \

@@ -2,9 +2,9 @@ FROM debian:bookworm-slim
 USER root
 
 ARG ADDITIONAL_PACKAGES=""
-ARG COMPOSER_FILE_HASH="dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f7cd84f6db9189d43a81e5503cda447da73c7e5b6"
+ARG COMPOSER_FILE_HASH="c8b085408188070d5f52bcfe4ecfbee5f727afa458b2573b8eaaf77b3419b0bf2768dc67c86944da1544f06fa544fd47"
 ARG TYPE="fpm"
-ARG VERSION=8.3
+ARG VERSION=8.5
 ENV LOCALE="de_DE.UTF-8 UTF-8\nen_US.UTF-8 UTF-8"
 ENV PHPIZE_DEPS="wget gnupg2 lsb-release libfreetype6-dev libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libavif-dev libheif-dev libxml2-dev libzip-dev locales"
 ENV VERSION=${VERSION}
@@ -35,9 +35,9 @@ RUN set -eux; \
  && locale-gen \
  && update-locale; \
     curl -sSLo /usr/share/keyrings/deb.sury.org-php.gpg https://packages.sury.org/php/apt.gpg \
- && echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list; \
-    apt-get update -y \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+ && echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list \
+ && apt-get update -y; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         ${ADDITIONAL_PACKAGES} \
         php${VERSION} \
         php${VERSION}-apcu \
@@ -54,22 +54,20 @@ RUN set -eux; \
         php${VERSION}-mbstring \
         php${VERSION}-mcrypt \
         php${VERSION}-mysql \
-        php${VERSION}-opcache \
         php${VERSION}-pgsql \
         php${VERSION}-readline \
         php${VERSION}-soap \
         php${VERSION}-sqlite3 \
         php${VERSION}-xml \
-        php${VERSION}-zip \
-        php${VERSION}-json; \
+        php${VERSION}-zip; \
     [ "${TYPE}" == "debug" ] && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends php${VERSION}-xdebug; \
     apt-get purge -y ${PHPIZE_DEPS} \
  && apt-get autoremove -y \
  && apt-get clean -y; \
-    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
- && php -r "if (hash_file('sha384', 'composer-setup.php') === '${COMPOSER_FILE_HASH}') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
- && php composer-setup.php --install-dir=/usr/bin --filename=composer \
- && php -r "unlink('composer-setup.php');"; \
+    php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');" \
+ && php -r "if (hash_file('sha384', '/tmp/composer-setup.php') === '${COMPOSER_FILE_HASH}') { echo 'Installer verified'; } else { echo 'Installer corrupt'; } echo PHP_EOL;" \
+ && php /tmp/composer-setup.php --install-dir=/usr/bin --filename=composer \
+ && php -r "unlink('/tmp/composer-setup.php');"; \
     mkdir -p /usr/local/apache2/htdocs/ \
  && chgrp www-data /var/log \
  && chmod gu+w /var/log
@@ -86,4 +84,4 @@ HEALTHCHECK \
 
 WORKDIR /usr/local/apache2/htdocs/
 USER www-data
-CMD ["php-fpm7.4"]
+CMD ["php-fpm8.5"]

@@ -2,12 +2,7 @@ Test locally with https://github.com/nektos/act
 
 ## Test build locally
 ```shell
-docker buildx build --load --no-cache --compress --progress=plain --build-arg="TYPE=debug" --build-arg="VERSION=7.4" --build-arg="ADDITIONAL_PACKAGES=php7.4-json" --tag "evoweb/php:7.4-debug" -f web/7.4/Dockerfile .
-docker buildx build --load --no-cache --compress --progress=plain --build-arg="TYPE=debug" --build-arg="VERSION=8.3" --tag "evoweb/php:8.3-debug" -f web/8.3/Dockerfile .
-docker buildx build --load --no-cache --compress --progress=plain --build-arg="TYPE=fpm" --build-arg="VERSION=8.3" --tag "evoweb/php:8.3-fpm" -f web/8.3/Dockerfile .
-docker run --rm evoweb/php:7.4-debug php -v
-docker run --rm evoweb/php:8.3-debug php -v
-docker run --rm evoweb/php:8.3-fpm php -v
+make test-8.4-fpm
 ```
 
 ## Usage
@@ -17,14 +12,12 @@ Either use docker directly like this
 or use docker compose with a config file like in the example below.
 
 Always use with at least one pool mounted. Either by overriding
-`/etc/php/[7.4-8.3]/fpm/pool.d/www.conf`
+`/etc/php/[7.4-8.5]/fpm/pool.d/www.conf`
 or by adding pools like
-`/etc/php/[7.4-8.3]/fpm/pool.d/production.conf`
+`/etc/php/[7.4-8.5]/fpm/pool.d/production.conf`
 
 ### docker-compose.yml
 ```yaml
-version: '3.9'
-
 networks:
     backend: {}
 
@@ -48,7 +41,7 @@ services:
         container_name: ${APP_NAME}_app
         restart: always
         networks:
-            - php
+            - backend
         environment:
             - HTTP_PRODUCTION_DOMAIN
             - HTTP_STAGING_DOMAIN

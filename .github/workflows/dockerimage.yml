@@ -15,16 +15,15 @@ jobs:
       matrix:
         version:
           - number: 7.4
-            packages: php7.4-json
           - number: "8.0"
           - number: 8.1
           - number: 8.2
           - number: 8.3
           - number: 8.4
-        variant: [ fpm, debug ]
+        type: [ fpm, debug ]
 
     runs-on: ubuntu-latest
-    name: Build "evoweb/php:${{ matrix.version.number }}-${{ matrix.variant }}" and push it to repository
+    name: Build "evoweb/php:${{ matrix.version.number }}-${{ matrix.type }}" and push it to repository
 
     steps:
       - uses: actions/checkout@v4
@@ -44,15 +43,14 @@ jobs:
           context: .
           load: true
           build-args: |
-            TYPE=${{ matrix.variant }}
+            TYPE=${{ matrix.type }}
             VERSION=${{ matrix.version.number }}
-            ADDITIONAL_PACKAGES=${{ matrix.version.packages }}
-          tags: evoweb/php:${{ matrix.version.number }}-${{ matrix.variant }}
+          tags: evoweb/php:${{ matrix.version.number }}-${{ matrix.type }}
 
       - name: Test the build image
         if: steps.build.outputs.imageid != ''
         run: |
-          docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.version.number }}-${{ matrix.variant }} php -v
+          docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.version.number }}-${{ matrix.type }} php -v
 
       - name: Log in to Docker Hub
         if: steps.build.outputs.imageid != '' && github.event_name != 'pull_request' && github.ref_name != 'main'
@@ -68,13 +66,13 @@ jobs:
           file: web/${{ matrix.version.number }}/Dockerfile
           context: .
           build-args: |
-            TYPE=${{ matrix.variant }}
+            TYPE=${{ matrix.type }}
             VERSION=${{ matrix.version.number }}
             ADDITIONAL_PACKAGES=${{ matrix.version.packages }}
           push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
           tags: |
-            evoweb/php:${{ matrix.version.number }}-${{ matrix.variant }}
-            evoweb/php:${{ matrix.version.number }}-${{ matrix.variant }}-${{ github.ref_name }}
+            evoweb/php:${{ matrix.version.number }}-${{ matrix.type }}
+            evoweb/php:${{ matrix.version.number }}-${{ matrix.type }}-${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}
 
   push_others_to_registry:
@@ -82,10 +80,10 @@ jobs:
       fail-fast: true
       max-parallel: 4
       matrix:
-        variant: [ crontab, composer, composer-node ]
+        type: [ crontab, composer, composer-node ]
 
     runs-on: ubuntu-latest
-    name: Build "evoweb/php:${{ matrix.variant }}" and push it to repository
+    name: Build "evoweb/php:${{ matrix.type }}" and push it to repository
 
     steps:
       - uses: actions/checkout@v4
@@ -101,15 +99,15 @@ jobs:
         continue-on-error: true
         uses: docker/build-push-action@v5
         with:
-          file: ${{ matrix.variant }}/Dockerfile
+          file: ${{ matrix.type }}/Dockerfile
           context: .
           load: true
-          tags: evoweb/php:${{ matrix.variant }}
+          tags: evoweb/php:${{ matrix.type }}
 
       - name: Test the build image
         if: steps.build.outputs.imageid != ''
         run: |
-          docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.variant }} php -v
+          docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/php:${{ matrix.type }} php -v
 
       - name: Log in to Docker Hub
         if: steps.build.outputs.imageid != '' && github.event_name != 'pull_request' && github.ref_name != 'main'
@@ -122,11 +120,11 @@ jobs:
         if: steps.build.outputs.imageid != '' && github.event_name != 'pull_request' && github.ref_name != 'main'
         uses: docker/build-push-action@v5
         with:
-          file: ${{ matrix.variant }}/Dockerfile
+          file: ${{ matrix.type }}/Dockerfile
           context: .
           push: ${{ github.event_name != 'pull_request' && github.ref_name != 'main' }}
           tags: |
-            evoweb/php:${{ matrix.variant }}
-            evoweb/php:${{ matrix.variant }}-latest
-            evoweb/php:${{ matrix.variant }}-${{ github.ref_name }}
+            evoweb/php:${{ matrix.type }}
+            evoweb/php:${{ matrix.type }}-latest
+            evoweb/php:${{ matrix.type }}-${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}

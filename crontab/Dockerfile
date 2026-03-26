@@ -1,13 +1,15 @@
 FROM debian:bookworm-slim
 USER root
 
+ARG VERSION=8.4
 ENV LOCALE="de_DE.UTF-8 UTF-8\nen_US.UTF-8 UTF-8"
-ENV PHPIZE_DEPS="lsb-release ca-certificates locales"
+ENV PHPIZE_DEPS="lsb-release locales"
 
 RUN set -eux; \
     apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         ${PHPIZE_DEPS} \
+        ca-certificates \
         curl \
         cron; \
     dpkg-reconfigure -fnoninteractive tzdata \
@@ -18,14 +20,16 @@ RUN set -eux; \
  && echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list; \
     apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        php8.3 \
-        php8.3-apcu \
-        php8.3-cli \
-        php8.3-common \
-        php8.3-curl \
-        php8.3-imap \
-        php8.3-mbstring \
-        php8.3-mcrypt; \
+        php${VERSION} \
+        php${VERSION}-apcu \
+        php${VERSION}-cli \
+        php${VERSION}-common \
+        php${VERSION}-curl \
+        php${VERSION}-xml \
+        php${VERSION}-imap \
+        php${VERSION}-intl \
+        php${VERSION}-mbstring \
+        php${VERSION}-mcrypt; \
     apt-get purge -y ${PHPIZE_DEPS} \
  && apt-get autoremove -y \
  && apt-get clean -y; \

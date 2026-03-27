@@ -36,9 +36,7 @@ RUN set -eux; \
     mkdir -p /etc/cron.5minutes \
  && echo '*/5 *    * * *   root    cd / && run-parts --report /etc/cron.5minutes >/proc/1/fd/1 2>/proc/1/fd/2' >> /etc/crontab; \
     chgrp www-data /run; \
-    chmod gu+rw /run; \
-    chmod gu+s /usr/sbin/cron
+    chmod gu+rw /run
 
 WORKDIR /app
-USER www-data
 CMD ["/usr/sbin/cron", "-f", "-l", "2"]

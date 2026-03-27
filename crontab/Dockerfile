@@ -38,5 +38,8 @@ RUN set -eux; \
     chgrp www-data /run; \
     chmod gu+rw /run
 
+COPY crontab/entrypoint.sh /entrypoint.sh
+
 WORKDIR /app
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/sbin/cron", "-f", "-l", "2"]

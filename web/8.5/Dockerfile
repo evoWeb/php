@@ -56,6 +56,7 @@ RUN set -eux; \
         php${VERSION}-mysql \
         php${VERSION}-pgsql \
         php${VERSION}-readline \
+        php${VERSION}-redis \
         php${VERSION}-soap \
         php${VERSION}-sqlite3 \
         php${VERSION}-xml \

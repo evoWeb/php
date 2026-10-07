@@ -57,6 +57,7 @@ RUN set -eux; \
         php${VERSION}-opcache \
         php${VERSION}-pgsql \
         php${VERSION}-readline \
+        php${VERSION}-redis \
         php${VERSION}-soap \
         php${VERSION}-sqlite3 \
         php${VERSION}-xml \

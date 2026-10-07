@@ -14,6 +14,7 @@ RUN apk add \
 	# Deployment
 	bash \
 	git \
+	openssh-client \
 	rsync \
 	# Front-end tools
 	nodejs \

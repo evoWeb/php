@@ -21,6 +21,7 @@ RUN set -eux; \
         libfcgi-bin \
         exiftags \
         ghostscript \
+        graphicsmagick \
         imagemagick \
         mariadb-client \
         postgresql-client \
